@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 
 // this will handle JWT tokens (assigned in login)
 function login(email, password) {
+
 }
 
 // Handle register requests

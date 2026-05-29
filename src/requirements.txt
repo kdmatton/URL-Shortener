@@ -1,1 +1,5 @@
 express
+pg
+bcrypt
+jsonwebtoken
+dotenv
