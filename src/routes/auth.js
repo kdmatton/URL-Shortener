@@ -1,3 +1,5 @@
+// handles all routes and invokes the function acording to the requests 
+
 const express = require('express')
 const router = express.Router()
 const authHandler = require('../handlers/auth') // stores all functions
