@@ -1,5 +1,4 @@
 const authService = require('../services/auth');
-const jwt = require('jsonwebtoken');
 
 const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
@@ -16,11 +15,22 @@ const login = async (req, res) => {
   }
 
   try {
-    const user = await authService.login(email, password);
-    if (!user) {
+    // check input, and serve response if incorrect 
+    const tokens = await authService.login(email, password)
+    if (!tokens) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    return res.status(200).json({ message: 'Login successful' });
+
+    // store refresh token in httponly
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    
+    return res.status(200).json({ accessToken: tokens.accessToken })
+
   } catch (err) {
     console.error('Login error:', err);
     return res.status(500).json({ message: 'Login failed' });

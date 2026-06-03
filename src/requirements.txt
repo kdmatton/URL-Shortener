@@ -3,3 +3,4 @@ pg
 bcrypt
 jsonwebtoken
 dotenv
+cookie-parser

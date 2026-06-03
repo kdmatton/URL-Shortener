@@ -44,7 +44,7 @@ async function login(email, password) {
     return { accessToken, refreshToken };
 }
 
-// Handle register requests
+
 async function register(email, password) {
     // check if email is already taken before attempting insert
     const existing = await dbUsers.query(
@@ -64,4 +64,30 @@ async function register(email, password) {
     return result.rows[0];
 }
 
-module.exports = { login, register };
+async function refresh(token) {
+    // verify the token is valid and not tampered with
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+
+    // look up the stored hash for this user
+    const result = await dbUsers.query(
+        'SELECT * FROM refresh_tokens WHERE user_id = $1 AND expires_at > NOW()',
+        [decoded.id]
+    );
+    const stored = result.rows[0];
+    if (!stored) return null;
+
+    // compare incoming token against the stored hash
+    const valid = await bcrypt.compare(token, stored.token_hash);
+    if (!valid) return null;
+
+    // issue a new access token
+    const accessToken = jwt.sign(
+        { id: decoded.id },
+        process.env.JWT_SECRET,
+        { expiresIn: '15m' }
+    );
+
+    return { accessToken };
+}
+
+module.exports = { login, register, refresh };
