@@ -13,4 +13,9 @@ const registerLimiter = rateLimit({
     message: { message: 'Too many accounts created, please try again later' }
 });
 
-module.exports = { shortenLimiter, registerLimiter };
+const loginLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    limit: 5,
+    message: { message: 'To many login attempts, please try again later' }
+})
+module.exports = { shortenLimiter, registerLimiter, loginLimiter };

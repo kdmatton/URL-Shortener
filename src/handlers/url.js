@@ -13,9 +13,21 @@ const shorten = async (req, res) => {
     }
 
     const parsed = new URL(url);
-    // checks if its the rights protocol 
+    // checks if its the rights protocol
     if (!['http:', 'https:'].includes(parsed.protocol)) {
         return res.status(400).json({ message: 'URL must use http or https' });
+    }
+
+    // prevent SSRF attacks
+    const blocked = ['localhost', '127.0.0.1', '0.0.0.0'];
+    const isPrivate = (hostname) =>
+        blocked.includes(hostname) ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('169.254.');
+
+    if (isPrivate(parsed.hostname)) {
+        return res.status(400).json({ message: 'URL not allowed' });
     }
 
     // return the new url if pass
