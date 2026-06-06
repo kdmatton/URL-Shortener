@@ -4,3 +4,4 @@ bcrypt
 jsonwebtoken
 dotenv
 cookie-parser
+express-rate-limit 

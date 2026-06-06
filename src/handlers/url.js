@@ -1,12 +1,13 @@
 const urlService = require('../services/url');
 
+// shortens the url 
 const shorten = async (req, res) => {
     const { url } = req.body;
 
     if (!url) return res.status(400).json({ message: 'URL is required' });
 
     try {
-        new URL(url); // checks if its a valid url
+        new URL(url); // checks if its a valid url 
     } catch {
         return res.status(400).json({ message: 'Invalid URL' });
     }
@@ -17,6 +18,7 @@ const shorten = async (req, res) => {
         return res.status(400).json({ message: 'URL must use http or https' });
     }
 
+    // return the new url if pass
     try {
         const code = await urlService.createShortUrl(url);
         return res.status(201).json({ shortUrl: `${req.protocol}://${req.get('host')}/${code}`, code });
@@ -25,6 +27,7 @@ const shorten = async (req, res) => {
     }
 };
 
+// handles the routing back to original route
 const redirect = async (req, res) => {
     const { code } = req.params;
 

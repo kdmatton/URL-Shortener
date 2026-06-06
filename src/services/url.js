@@ -10,11 +10,12 @@ function generateCode(length = 6) {
         .join('');
 }
 
+// create short code url
 async function createShortUrl(originalUrl) {
     let code
     let attempts = 0
 
-    // check if code is already generated 
+    // check if code is already generated (rare case)
     while (attempts < 5) {
         code = generateCode();
         const existing = await db.query('SELECT 1 FROM urls WHERE code = $1', [code]);
@@ -22,6 +23,7 @@ async function createShortUrl(originalUrl) {
         attempts++;
     }
 
+    // add original url and code
     await db.query(
         'INSERT INTO urls (code, original_url) VALUES ($1, $2)',
         [code, originalUrl]
