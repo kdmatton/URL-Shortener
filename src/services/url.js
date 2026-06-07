@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const db = require('../config/db');
+const cache = require('../config/cache');
 
 const CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
@@ -29,15 +30,22 @@ async function createShortUrl(originalUrl) {
         [code, originalUrl]
     );
 
+    await cache.set(code, originalUrl, { EX: 60 * 60 });
     return code;
 }
 
 async function getOriginalUrl(code) {
+    const cached = await cache.get(code);
+    if (cached) return cached;
+
     const result = await db.query(
         'SELECT original_url FROM urls WHERE code = $1',
         [code]
     );
-    return result.rows[0]?.original_url ?? null;
+    const originalUrl = result.rows[0]?.original_url ?? null;
+
+    if (originalUrl) await cache.set(code, originalUrl, { EX: 60 * 60 });
+    return originalUrl;
 }
 
 module.exports = { createShortUrl, getOriginalUrl };
