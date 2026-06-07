@@ -13,10 +13,14 @@ function generateCode(length = 6) {
 
 // create short code url
 async function createShortUrl(originalUrl) {
+    // check if url was already created and in cache
+    const cachedCode = await cache.get(`url:${originalUrl}`);
+    if (cachedCode) return cachedCode;
+
+    // create new row in db
     let code
     let attempts = 0
-
-    // check if code is already generated (rare case)
+    
     while (attempts < 5) {
         code = generateCode();
         const existing = await db.query('SELECT 1 FROM urls WHERE code = $1', [code]);
@@ -24,13 +28,14 @@ async function createShortUrl(originalUrl) {
         attempts++;
     }
 
-    // add original url and code
     await db.query(
         'INSERT INTO urls (code, original_url) VALUES ($1, $2)',
         [code, originalUrl]
     );
 
+    // reverse mapping on miss 
     await cache.set(code, originalUrl, { EX: 60 * 60 });
+    await cache.set(`url:${originalUrl}`, code, { EX: 60 * 60 });
     return code;
 }
 
