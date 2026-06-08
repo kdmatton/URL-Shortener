@@ -25,7 +25,8 @@ const authenticate = async (req, res, next) => {
         if (!result) return res.status(401).json({ message: 'Session expired, please log in again' });
 
         req.user = jwt.decode(result.accessToken);
-        res.setHeader('x-new-access-token', result.accessToken);
+        const originalJson = res.json.bind(res);
+        res.json = (body) => originalJson({ ...body, accessToken: result.accessToken });
         return next();
     } catch {
         return res.status(401).json({ message: 'Session expired, please log in again' });
