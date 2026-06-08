@@ -5,4 +5,5 @@ jsonwebtoken
 dotenv
 cookie-parser
 express-rate-limit 
-node-cache
+redis
+cors

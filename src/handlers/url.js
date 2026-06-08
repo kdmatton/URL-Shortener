@@ -5,7 +5,6 @@ const shorten = async (req, res) => {
     const { url } = req.body;
 
     if (!url) return res.status(400).json({ message: 'URL is required' });
-
     try {
         new URL(url); // checks if its a valid url 
     } catch {
@@ -42,11 +41,10 @@ const shorten = async (req, res) => {
 // handles the routing back to original route
 const redirect = async (req, res) => {
     const { code } = req.params;
-
     try {
         const originalUrl = await urlService.getOriginalUrl(code);
         if (!originalUrl) return res.status(404).json({ message: 'Short URL not found' });
-        return res.redirect(302, originalUrl);
+        return res.redirect(302, originalUrl); // handles the redirect 
     } catch (err) {
         return res.status(500).json({ message: 'Redirect failed' });
     }

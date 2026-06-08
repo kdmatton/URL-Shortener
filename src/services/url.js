@@ -15,12 +15,12 @@ function generateCode(length = 6) {
 async function createShortUrl(originalUrl) {
     // check if url was already created and in cache
     const cachedCode = await cache.get(`url:${originalUrl}`);
-    if (cachedCode) return cachedCode;
+    if (cachedCode) {return cachedCode};
 
     // create new row in db
     let code
     let attempts = 0
-    
+
     while (attempts < 5) {
         code = generateCode();
         const existing = await db.query('SELECT 1 FROM urls WHERE code = $1', [code]);
@@ -41,7 +41,7 @@ async function createShortUrl(originalUrl) {
 
 async function getOriginalUrl(code) {
     const cached = await cache.get(code);
-    if (cached) return cached;
+    if (cached) {return cached};
 
     const result = await db.query(
         'SELECT original_url FROM urls WHERE code = $1',
