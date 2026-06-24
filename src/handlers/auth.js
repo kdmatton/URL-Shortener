@@ -48,7 +48,7 @@ const register = async (req, res) => {
   }
   
   try {
-    const user = await authService.register(email, password);
+    await authService.register(email, password);
     return res.status(201).json({ message: 'User created'});
   } catch (err) {
     if (err.code === 'DUPLICATE_EMAIL' || err.code === '23505') {
@@ -58,4 +58,15 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { login, register }; // allows functions to be used outside
+const logout = async (req, res) => {
+  const token = req.cookies?.refreshToken;
+  if (token) await authService.logout(token);
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+  return res.status(200).json({ message: 'Logged out' });
+};
+
+module.exports = { login, register, logout };

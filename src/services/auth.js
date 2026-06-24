@@ -90,4 +90,13 @@ async function refresh(token) {
     return { accessToken };
 }
 
-module.exports = { login, register, refresh };
+async function logout(token) {
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        await dbUsers.query('DELETE FROM refresh_tokens WHERE user_id = $1', [decoded.id]);
+    } catch {
+        // invalid or expired token — nothing to delete, that's fine
+    }
+}
+
+module.exports = { login, register, refresh, logout };

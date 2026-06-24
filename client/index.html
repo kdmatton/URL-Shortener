@@ -241,7 +241,10 @@
         });
 
         // Logout
-        document.getElementById('logout-btn').addEventListener('click', () => {
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
+            } catch {}
             accessToken = null;
             localStorage.removeItem('accessToken');
             document.getElementById('result').classList.add('d-none');
@@ -278,6 +281,11 @@
                 }
 
                 if (!res.ok) return showAlert(shortenAlert, data.message);
+
+                if (data.accessToken) {
+                    accessToken = data.accessToken;
+                    localStorage.setItem('accessToken', accessToken);
+                }
 
                 const link = document.getElementById('short-url-link');
                 link.href = data.shortUrl;

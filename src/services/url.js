@@ -28,6 +28,8 @@ async function createShortUrl(originalUrl) {
         attempts++;
     }
 
+    if (attempts >= 5) throw new Error('Failed to generate a unique short code');
+
     await db.query(
         'INSERT INTO urls (code, original_url) VALUES ($1, $2)',
         [code, originalUrl]
