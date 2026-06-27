@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dir: src
+          cache-dependency-path: src/package-lock.json
 
       # Step 3: Install all dependencies (including dev deps like jest) for testing.
       - name: Install dependencies
