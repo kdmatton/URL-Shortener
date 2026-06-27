@@ -1,7 +1,8 @@
 const app = require('./app');
 const cache = require('./config/cache');
 
-const PORT = 8000;
+// Locally, PORT is not set so it falls back to 8000.
+const PORT = process.env.PORT || 8000;
 
 cache.connect().then(() => {
     console.log('Redis connected');

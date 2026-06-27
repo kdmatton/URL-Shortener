@@ -1,0 +1,61 @@
+name: Build and Deploy
+
+# Trigger this workflow on every push to the main branch.
+# Pull requests do not trigger a deploy — only merged, production-ready code does.
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-build-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code so the workflow can access it.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Node.js so we can run the test suite.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dir: src
+
+      # Step 3: Install all dependencies (including dev deps like jest) for testing.
+      - name: Install dependencies
+        working-directory: src
+        run: npm ci
+
+      # Step 4: Run the test suite.
+      # If any test fails, the workflow stops here — nothing gets built or deployed.
+      - name: Run tests
+        working-directory: src
+        run: npm test
+
+      # Step 5: Authenticate to Google Cloud using the service account key.
+      # GCP_SA_KEY is the JSON key we stored as a GitHub Secret.
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Step 6: Configure Docker to use gcloud credentials when pushing to Artifact Registry.
+      # This allows the docker push command to authenticate automatically.
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      # Step 7: Build the Docker image.
+      # We tag it with the Git commit SHA so every image is uniquely identifiable.
+      # This means you can always trace an image back to the exact commit that produced it.
+      - name: Build Docker image
+        working-directory: src
+        run: |
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/url-shortener/backend:${{ github.sha }} .
+
+      # Step 8: Push the image to Artifact Registry.
+      - name: Push Docker image
+        run: |
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/url-shortener/backend:${{ github.sha }}

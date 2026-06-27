@@ -1,0 +1,14 @@
+#This is to help build time to preent long build
+# Dependencies — reinstalled cleanly inside the container via npm ci
+node_modules
+
+# Test suite — not needed in a production image
+__tests__
+
+# Local environment file — secrets must never be baked into the image.
+# On Cloud Run, environment variables are injected at runtime via the console or gcloud CLI.
+.env
+
+# Git metadata
+.git
+.gitignore
