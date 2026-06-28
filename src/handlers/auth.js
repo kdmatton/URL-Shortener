@@ -51,6 +51,7 @@ const register = async (req, res) => {
     await authService.register(email, password);
     return res.status(201).json({ message: 'User created'});
   } catch (err) {
+    console.error('Register error:', err);
     if (err.code === 'DUPLICATE_EMAIL' || err.code === '23505') {
       return res.status(409).json({ message: 'Email already in use' });
     }
