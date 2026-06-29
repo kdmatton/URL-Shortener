@@ -1,11 +1,22 @@
 const { Pool } = require('pg');
 
-const db = new Pool({
-    host: process.env.DB_HOST,
+// Base configuration
+const poolConfig = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-});
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+};
+
+// Check if DB_HOST points to a Cloud SQL Unix socket path
+if (process.env.DB_HOST && process.env.DB_HOST.startsWith('/cloudsql/')) {
+    // Cloud Run Unix socket connection
+    poolConfig.host = process.env.DB_HOST;
+} else {
+    // Standard TCP connection (Local development / fallback)
+    poolConfig.host = process.env.DB_HOST || 'localhost';
+}
+
+const db = new Pool(poolConfig);
 
 module.exports = db;
