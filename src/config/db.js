@@ -10,7 +10,6 @@ const poolConfig = {
 
 // Check if DB_HOST points to a Cloud SQL Unix socket path
 if (process.env.DB_HOST && process.env.DB_HOST.startsWith('/cloudsql/')) {
-    // Cloud Run Unix socket connection
     poolConfig.host = process.env.DB_HOST;
 } else {
     // Standard TCP connection (Local development / fallback)
