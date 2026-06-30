@@ -43,14 +43,14 @@ const shortenLimiter = async (req, res, next) => {
 };
 
 const registerLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    limit: 5,
+    windowMs: 3 * 60 * 1000, // 3 minutes
+    limit: 15,
     message: { message: 'Too many accounts created, please try again later' }
 });
 
 const loginLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    limit: 5,
+    windowMs: 3 * 60 * 1000, // 3 minutes
+    limit: 15,
     message: { message: 'To many login attempts, please try again later' }
 })
 module.exports = { shortenLimiter, registerLimiter, loginLimiter };
