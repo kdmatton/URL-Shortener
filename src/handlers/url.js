@@ -32,7 +32,8 @@ const shorten = async (req, res) => {
     // return the new url if pass
     try {
         const code = await urlService.createShortUrl(url);
-        return res.status(201).json({ shortUrl: `${req.protocol}://${req.get('host')}/${code}`, code });
+        const base = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+        return res.status(201).json({ shortUrl: `${base}/${code}`, code });
     } catch (err) {
         return res.status(500).json({ message: 'Failed to shorten URL' });
     }
