@@ -6,6 +6,9 @@ const poolConfig = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     port: parseInt(process.env.DB_PORT || '5432', 10),
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
 };
 
 // Check if DB_HOST points to a Cloud SQL Unix socket path

@@ -28,6 +28,7 @@ const tokenBucketScript = `
 ;
 
 const shortenLimiter = async (req, res, next) => {
+    if (process.env.DISABLE_RATE_LIMIT === 'true' && process.env.NODE_ENV !== 'production') return next();
     try {
         const key = `rate:shorten:${req.user.id}`;
         const now = Date.now() / 1000;
@@ -45,12 +46,14 @@ const shortenLimiter = async (req, res, next) => {
 const registerLimiter = rateLimit({
     windowMs: 3 * 60 * 1000, // 3 minutes
     limit: 15,
+    skip: () => process.env.DISABLE_RATE_LIMIT === 'true' && process.env.NODE_ENV !== 'production',
     message: { message: 'Too many accounts created, please try again later' }
 });
 
 const loginLimiter = rateLimit({
     windowMs: 3 * 60 * 1000, // 3 minutes
     limit: 15,
-    message: { message: 'To many login attempts, please try again later' }
-})
+    skip: () => process.env.DISABLE_RATE_LIMIT === 'true' && process.env.NODE_ENV !== 'production',
+    message: { message: 'Too many login attempts, please try again later' }
+});
 module.exports = { shortenLimiter, registerLimiter, loginLimiter };

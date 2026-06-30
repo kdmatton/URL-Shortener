@@ -11,11 +11,15 @@ function generateCode(length = 6) {
         .join('');
 }
 
+const noCache = () => process.env.NO_CACHE === 'true' && process.env.NODE_ENV !== 'production';
+
 // create short code url
 async function createShortUrl(originalUrl) {
     // check if url was already created and in cache
-    const cachedCode = await cache.get(`url:${originalUrl}`);
-    if (cachedCode) {return cachedCode};
+    if (!noCache()) {
+        const cachedCode = await cache.get(`url:${originalUrl}`);
+        if (cachedCode) {return cachedCode};
+    }
 
     // create new row in db
     let code
@@ -35,15 +39,18 @@ async function createShortUrl(originalUrl) {
         [code, originalUrl]
     );
 
-    // reverse mapping on miss 
-    await cache.set(code, originalUrl, { EX: 60 * 60 });
-    await cache.set(`url:${originalUrl}`, code, { EX: 60 * 60 });
+    if (!noCache()) {
+        await cache.set(code, originalUrl, { EX: 60 * 60 });
+        await cache.set(`url:${originalUrl}`, code, { EX: 60 * 60 });
+    }
     return code;
 }
 
 async function getOriginalUrl(code) {
-    const cached = await cache.get(code);
-    if (cached) {return cached};
+    if (!noCache()) {
+        const cached = await cache.get(code);
+        if (cached) {return cached};
+    }
 
     const result = await db.query(
         'SELECT original_url FROM urls WHERE code = $1',
@@ -51,7 +58,7 @@ async function getOriginalUrl(code) {
     );
     const originalUrl = result.rows[0]?.original_url ?? null;
 
-    if (originalUrl) await cache.set(code, originalUrl, { EX: 60 * 60 });
+    if (originalUrl && !noCache()) await cache.set(code, originalUrl, { EX: 60 * 60 });
     return originalUrl;
 }
 
