@@ -1,5 +1,7 @@
 # URL Shortener
 
+**Live:** [https://urls-shrink.netlify.app](https://urls-shrink.netlify.app)
+
 A REST API that shortens URLs, built with Node.js and Express. Includes JWT authentication, a Redis cache for fast redirects, and rate limiting backed by a Redis token-bucket to prevent abuse. There is also alot of cool low level system design techniques implemented in this project for example: reverse mapping in cache to prevent duplicated stores. So please go through this project and look at in line documentation! 
 
 > **Note:** The live deployment may be offline to avoid cloud infrastructure costs (Cloud SQL). The code is fully functional and can be run locally. If you want a live deployment, create cloud instance and then make sure you go into cloud run and set variable name accordingly with the DB.config
