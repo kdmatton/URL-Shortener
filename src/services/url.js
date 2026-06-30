@@ -34,10 +34,19 @@ async function createShortUrl(originalUrl) {
 
     if (attempts >= 5) throw new Error('Failed to generate a unique short code');
 
-    await db.query(
-        'INSERT INTO urls (code, original_url) VALUES ($1, $2)',
-        [code, originalUrl]
-    );
+    // runs one additional query if the url already exists in db 
+    try {
+        await db.query(
+            'INSERT INTO urls (code, original_url) VALUES ($1, $2)',
+            [code, originalUrl]
+        );
+    } catch (err) {
+        if (err.code === '23505') {
+            const existing = await db.query('SELECT code FROM urls WHERE original_url = $1', [originalUrl]);
+            return existing.rows[0].code;
+        }
+        throw err;
+    }
 
     if (!noCache()) {
         await cache.set(code, originalUrl, { EX: 60 * 60 });
